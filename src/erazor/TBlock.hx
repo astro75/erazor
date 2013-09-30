@@ -10,4 +10,6 @@ enum TBlock
 	
 	// Code that should be printed immediately
 	printBlock(s : String);
+	
+	printBlockWithDot(s : String);
 }

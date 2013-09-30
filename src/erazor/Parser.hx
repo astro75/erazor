@@ -21,6 +21,7 @@ private enum ParseResult {
 class Parser
 {
 	private static var at = '@';
+	private static var dot = '.';
 
 	private var condMatch : EReg;
 	private var inConditionalMatch : EReg;
@@ -154,9 +155,17 @@ class Parser
 		var output = "";
 		var char : String = null;
 		var part : String = null;
+		
+		var hasDot = false;
+		var pos = 1;
 
-		// Remove @
-		template = template.substr(1);
+		if (template.charAt(1) == Parser.dot) {
+			pos = 2;
+			hasDot = true;
+		}
+		
+		// Remove @. or @
+		template = template.substr(pos);
 
 		do
 		{
@@ -190,7 +199,7 @@ class Parser
 			}
 		} while (char != null);
 
-		return { block: TBlock.printBlock(output), length: output.length + 1, start:this.pos };
+		return { block: (hasDot ? TBlock.printBlockWithDot(output) : TBlock.printBlock(output)), length: output.length + pos, start:this.pos };
 	}
 
 	function parseVariableChar(char : String) : ParseResult
@@ -226,22 +235,30 @@ class Parser
 
 			return parseConditional(template);
 		}
+		
+		var pos = 1;
+		var hasDot = false;
+		
+		if (peek(template, 1) == Parser.dot) {
+			pos = 2;
+			hasDot = true;
+		}
 
 		// Test for variable like @name
-		if (peek(template) == '@' && isIdentifier(peek(template, 1)))
+		if (isIdentifier(peek(template, pos)))
 			return parseVariable(template);
 
 		// Test for code or print block @{ or @(
-		var startBrace = peek(template, 1);
+		var startBrace = peek(template, pos);
 		var endBrace = (startBrace == '{') ? '}' : ')';
 
-		var str = parseScriptPart(template.substr(1), startBrace, endBrace);
-		var noBraces = StringTools.trim(str.substr(1, str.length - 2));
+		var str = parseScriptPart(template.substr(pos), startBrace, endBrace);
+		var noBraces = StringTools.trim(str.substr(pos, str.length - 2));
 
-		if(startBrace == '{')
-			return { block: TBlock.codeBlock(noBraces), length: str.length + 1, start:this.pos };
+		if (startBrace == '{')
+			return { block: TBlock.codeBlock(noBraces), length: str.length + pos, start:this.pos };
 		else // (
-			return { block: TBlock.printBlock(noBraces), length: str.length + 1, start:this.pos };
+			return { block: (hasDot ? TBlock.printBlockWithDot(noBraces) : TBlock.printBlock(noBraces)), length: str.length + pos, start:this.pos };
 	}
 
 	private function parseString(str : String, modifier : String -> ParseResult, throwAtEnd : Bool) : String

@@ -1,8 +1,8 @@
 package erazor.macro;
 import erazor.error.ParserError;
+import erazor.Output;
 import erazor.Parser;
 import erazor.ScriptBuilder;
-import haxe.ds.StringMap;
 import haxe.ds.StringMap;
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -198,7 +198,7 @@ class Build
 
 		var executeBlock = [];
 
-		executeBlock.push(macro var __b__ = new StringBuf());
+		executeBlock.push(macro var __b__ = new Output(escape, escapeWithDot));
 		executeBlock.push(expr);
 		executeBlock.push(macro return __b__.toString());
 

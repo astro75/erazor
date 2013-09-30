@@ -17,14 +17,27 @@ class Template
 	
 	public var variables(default, null) : Hash<Dynamic>;
 	
-	public function new(template : String)
+	public function new(template : String, escapeWithoutDot = false)
 	{
 		this.template = template;
+		if (escapeWithoutDot) {
+			var temp = escape;
+			escape = escapeWithDot;
+			escapeWithDot = temp;
+		}
+	}
+	
+	public dynamic function escape(str : String) : String { 
+		return str;
+	}
+	
+	public dynamic function escapeWithDot(str : String) : String { 
+		return StringTools.htmlEscape(str, true);
 	}
 	
 	public function execute(?content : PropertyObject) : String
 	{
-		var buffer = new StringBuf();
+		var buffer = new Output(escape, escapeWithDot);
 		
 		// Parse the template into TBlocks for the HTemplateParser
 		var parsedBlocks = new Parser().parse(template);

@@ -18,6 +18,14 @@ class Template
 		
 	}
 	
+	public dynamic function escape(str : String) : String { 
+		return str;
+	}
+	
+	public dynamic function escapeWithDot(str : String) : String { 
+		return StringTools.htmlEscape(str, true);
+	}
+	
 	public function execute():String
 	{
 		return null;
